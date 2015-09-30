@@ -1,0 +1,63 @@
+/* This is the program which calculates the value of pi*/
+/*It uses lodepng image editing library*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "lodepng.h"
+
+int main()
+{
+    int count=0,trav=-1,greatest=-1;
+
+    unsigned char *image,*image2;
+    char *in="infile.png";
+
+    unsigned int rgba,x,y,i,j,width,height,error;
+    /* Decoding the image for processing*/
+
+    error = lodepng_decode32_file(&image, &width, &height, in);
+    if(error)
+    {
+        printf("%s decoder error %u: %s\n", in,error, lodepng_error_text(error));
+        exit(1);
+    }
+    rgba=width*height*4;
+
+    int* counter=(int*)calloc(height,sizeof(int));
+    /* Counting the black pixels in each row*/
+
+    for(i=0; i<rgba; i+=4)
+    {
+        if((i/4)%width==0)
+        {
+            trav++;
+            counter[trav]=0;
+
+        }
+
+        for(j=0; j<3; j++)
+        {
+            if(image[i+j]==0)
+            {
+                counter[trav]++;
+            }
+        }
+
+    }
+
+/* Finding the total black pixel count and find the greatest number of black pixels in a row thus calculating the diameter*/
+
+    for(i=0; i<height; i++)
+    {   count=counter[i]+count;
+        if(counter[i]>greatest)
+            greatest=counter[i];
+
+    }
+/* Calculating the value of pi using A=pi*r^2 */
+
+    double pi=(double)(count)/(3*greatest*greatest/36);
+    printf("\nValue of pi: %lf",pi);
+    free(image);
+    return 0;
+
+}
